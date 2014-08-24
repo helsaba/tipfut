@@ -257,7 +257,7 @@ def on_tweet(status)
 			return
 		end		
 		
-        amount = (10 + $random.rand(30).to_f) / 100
+        amount = (10 + $random.rand(50).to_f) / 10
 		$log.debug("Amount: #{amount}")
 		
 		if $last_faucet[username] == nil || $last_faucet[username] + (24 * 60 * 60) < Time.now
