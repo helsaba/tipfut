@@ -2,9 +2,10 @@
 
 =begin
 
-Tipmona bot v0.01
+Throwrin bot v0.01
+Based on Tipmona bot v0.01
 
-- Donation welcome -
+- Donation (for Tipmona) welcome -
   BTC: 15bi3u4pFxBA3fMrsXsNn645igW7xSJmny
   LTC: Ld5ojxT92egBsa2nJiK6DdzBB1Hoh5r7o3
  MONA: MSEFCyitaSrTKgp4gdGPhMxxY5ZmBx9wbg
@@ -34,6 +35,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
+APPEND: Copyright (c) 2014 MonacoEx.org (Fixes for RINGO)
+
 =end
 
 # そろそろきっちりクラスにしたい。
@@ -56,6 +59,10 @@ require 'digest/md5'
 
 require './config.rb'
 
+$faucet_userid='throwrin-2761034186'
+$maintainer_screenname='MonacoEx'
+$maintainer_userid='throwrin-2611149793'
+
 # DB接続
 ActiveRecord::Base.configurations = YAML.load_file('database.yml')
 ActiveRecord::Base.establish_connection("production")
@@ -74,7 +81,7 @@ log_file = File.open("bot.log", "a")
 
 $log = Logger.new(MultiIO.new(STDOUT, log_file), 5)
 
-$monacoind = BitcoinRPC.new("http://#{COIND_USERNAME}:#{COIND_PASSWORD}@#{COIND_ADDRESS}:#{COIND_PORT}")
+$coind = BitcoinRPC.new("http://#{COIND_USERNAME}:#{COIND_PASSWORD}@#{COIND_ADDRESS}:#{COIND_PORT}")
 
 $last_faucet = Hash::new
 
@@ -165,7 +172,7 @@ end
 #接続時に送られるフォロワーリストを受けたときの処理
 client.on_friends do |friends|
   $log.info("Recieved a friends list")
-# postTwitter("@palon7 Tipmona " + $ver + " ready")
+# postTwitter("@palon7 Throwrin " + $ver + " ready")
 end
 
 #ツイート削除を含むメッセージを受けたときの処理
@@ -176,34 +183,34 @@ end
 
 #ツイートなどを含むメッセージを受けたときの処理
 def on_tweet(status)
-  if !status.text.index("RT") && !status.text.index("QT") && status.user.screen_name != "tipmona"
+  if !status.text.index("RT") && !status.text.index("QT") && status.user.screen_name != "throwrin"
  	#   checkfollow()
     $log.info("Tweet from #{status.user.screen_name}: #{status.text}")
 
-	if !status.text.index("@tipmona")
+	if !status.text.index("@throwrin")
 		return
 	end
 
-    message = status.text.gsub(/@tipmona ?/, "")
+    message = status.text.gsub(/@throwrin ?/, "")
     $log.info("Message: #{message}")
 
 	username = status.user.screen_name
     idstr = status.user.id.to_s
-    account = "tipmona-" + idstr
-    old_account = "tipmona-" + username.downcase
+    account = "throwrin-" + idstr
+    old_account = "throwrin-" + username.downcase
     
     # 古いデータが残っていれば自動で移動
-    old_balance = $monacoind.getbalance(old_account,6)
+    old_balance = $coind.getbalance(old_account,6)
     if old_balance > 0
         $log.info("Old balance is active. moving...")
-        $monacoind.move(old_account, account, old_balance)
+        $coind.move(old_account, account, old_balance)
     end
 
 	pp status
 	# ステータスID
 	to_status_id = status.id
 	
-	return if username == "tipmona"
+	return if username == "throwrin"
     userdata = get_user(username)
 	
 	# トランザクション処理
@@ -220,7 +227,7 @@ def on_tweet(status)
 		BAN_USER.each do |v|
 			if username == v
 				$log.info("-> Banned user.")
-				postTwitter("@#{username} あなたのアカウントはfaucet機能を停止されています。ご不明な点があれば@palon7へご連絡ください。", to_status_id)
+				postTwitter("@#{username} あなたのアカウントはfaucet機能を停止されています。ご不明な点があれば@#{$maintainer_screenname}へご連絡ください。", to_status_id)
 			end
 		end
 		# Tweet count
@@ -254,33 +261,33 @@ def on_tweet(status)
 		$log.debug("Amount: #{amount}")
 		
 		if $last_faucet[username] == nil || $last_faucet[username] + (24 * 60 * 60) < Time.now
-			fb = $monacoind.getbalance("tipmona-2350081615")
+			fb = $coind.getbalance($faucet_userid)
 			if fb < 1
 				$log.info("-> Not enough faucet pot!")
 				if isjp(username)
 					postTwitter(dice([
-						"@#{username} ごめんなさい、配布用ポットの中身が足りません＞＜ @mona_faucetに送金してもらえると嬉しいですっ！",
-						"@#{username} ごめんなさい、配布用ポットにMONAが入ってないみたいです＞＜ @mona_faucetに送金してもらえると嬉しいですっ！",
-						"@#{username} ごめんなさい、配布用ポットの中身がもうありません＞＜ @mona_faucetに送金してもらえると嬉しいですっ！",
-						"@#{username} ごめんなさい、配布用ポットの中身がないみたいですっ＞＜ @mona_faucetに送金してもらえると嬉しいですっ！"
+						"@#{username} ごめんなさい、配布用ポットの中身が足りません＞＜ @rin_faucetに送金してもらえると嬉しいですっ！",
+						"@#{username} ごめんなさい、配布用ポットにRINが入ってないみたいです＞＜ @rin_faucetに送金してもらえると嬉しいですっ！",
+						"@#{username} ごめんなさい、配布用ポットの中身がもうありません＞＜ @rin_faucetに送金してもらえると嬉しいですっ！",
+						"@#{username} ごめんなさい、配布用ポットの中身がないみたいですっ＞＜ @rin_faucetに送金してもらえると嬉しいですっ！"
 					]), to_status_id)
 				else
-					postTwitter("@#{username} Sorry, there is no more MONA in faucet (><) Please tip to @mona_faucet#{getps()}", to_status_id)
+					postTwitter("@#{username} Sorry, there is no more RIN in faucet (><) Please tip to @rin_faucet#{getps()}", to_status_id)
 				end
 				return
 			end
 			
-			$monacoind.move("tipmona-2350081615", account, amount)
+			$coind.move($faucet_userid, account, amount)
 			$log.info("-> Done.")
 			if isjp(username)
 				postTwitter(dice([
-					"@#{username} さんに#{amount}Monaプレゼントっ！",
-					"@#{username} さんに#{amount}Monaをプレゼント！",
-					"@#{username} さんに#{amount}Monaをプレゼントしましたっ！",
-					"@#{username} さんに#{amount}Monaプレゼントしました！！"
+					"@#{username} さんに#{amount}Rinプレゼントっ！",
+					"@#{username} さんに#{amount}Rinをプレゼント！",
+					"@#{username} さんに#{amount}Rinをプレゼントしましたっ！",
+					"@#{username} さんに#{amount}Rinプレゼントしました！！"
 				]), to_status_id)
 			else
-				postTwitter("Present for @#{username} -san! Sent #{amount}Mona!", to_status_id)
+				postTwitter("Present for @#{username} -san! Sent #{amount}Rin!", to_status_id)
 			end
 			$last_faucet[username] = Time.now
 		else
@@ -293,7 +300,7 @@ def on_tweet(status)
 					"@#{username} まだ最後の配布から24時間経ってないみたいです・・・・ごめんなさい！"
 				]), to_status_id)
 			else
-				postTwitter("@#{username} You have already received MONA in the last 24 hours#{getps()}", to_status_id)
+				postTwitter("@#{username} You have already received RIN in the last 24 hours#{getps()}", to_status_id)
 			end
 		end
 	when /(Follow|follow|フォロー|ふぉろー)して/
@@ -303,19 +310,19 @@ def on_tweet(status)
 		postTwitter("@#{username} をフォローしました！", to_status_id)
 	when /balance/
 		$log.info("Check balance of #{username}...")
-		balance = $monacoind.getbalance(account,6)
-		all_balance = $monacoind.getbalance(account,0)
-		$log.info("-> #{balance}MONA (all: #{all_balance}MONA)")
+		balance = $coind.getbalance(account,6)
+		all_balance = $coind.getbalance(account,0)
+		$log.info("-> #{balance}RIN (all: #{all_balance}RIN)")
 		if isjp(username)
 			$log.debug("Rolling dice")
 begin
 			status = dice([
-				"@#{username} さんの残高は #{balance} Monaです！ (confirm中残高との合計: #{all_balance} Mona)",
-				"@#{username} さんの残高は #{balance} Monaですよ！ (confirm中残高との合計: #{all_balance} Mona)",
-				"@#{username} さんのアカウントには #{balance} Monaあります！ (confirm中残高との合計: #{all_balance} Mona)",
-				"@#{username} さんのアカウントには #{balance} Monaありますよ！ (confirm中残高との合計: #{all_balance} Mona)",
-				"@#{username} さんの残高は #{balance} Monaですっ！ (confirm中残高との合計: #{all_balance} Mona)",
-				"@#{username} さんの残高は #{balance} Monaですよっ！ (confirm中残高との合計: #{all_balance} Mona)"
+				"@#{username} さんの残高は #{balance} Rinです！ (confirm中残高との合計: #{all_balance} Rin)",
+				"@#{username} さんの残高は #{balance} Rinですよ！ (confirm中残高との合計: #{all_balance} Rin)",
+				"@#{username} さんのアカウントには #{balance} Rinあります！ (confirm中残高との合計: #{all_balance} Rin)",
+				"@#{username} さんのアカウントには #{balance} Rinありますよ！ (confirm中残高との合計: #{all_balance} Rin)",
+				"@#{username} さんの残高は #{balance} Rinですっ！ (confirm中残高との合計: #{all_balance} Rin)",
+				"@#{username} さんの残高は #{balance} Rinですよっ！ (confirm中残高との合計: #{all_balance} Rin)"
 			])
 			$log.debug("Send: @#{status}")
 			postTwitter(status,to_status_id)
@@ -323,24 +330,24 @@ rescue
  		   $log.error("#{exc}: [text]#{text}")
 end   
 		else
-			postTwitter("@#{username} 's balance is #{balance} Mona#{getps()} (Total with confirming balance: #{all_balance} Mona)", to_status_id)
+			postTwitter("@#{username} 's balance is #{balance} Rin#{getps()} (Total with confirming balance: #{all_balance} Rin)", to_status_id)
 		end
 	when /deposit/
 		$log.info("Get deposit address of #{username}...")
-		address = $monacoind.getaccountaddress(account)
+		address = $coind.getaccountaddress(account)
 		$log.info("-> #{account} = #{address}")
 		if isjp(username)
 			postTwitter(dice([
-				"@#{username} #{address} にMonacoinを送金してください！",
-				"@#{username} #{address} にMonacoinを送ってください！",
-				"@#{username} #{address} にMonacoinを送金してくださいっ！",
-				"@#{username} #{address} にMonacoinを送ってくださいっ！"
+				"@#{username} #{address} にRingoを送金してください！",
+				"@#{username} #{address} にRingoを送ってください！",
+				"@#{username} #{address} にRingoを送金してくださいっ！",
+				"@#{username} #{address} にRingoを送ってくださいっ！"
 			]), to_status_id)
 		else
-			postTwitter("@#{username} Please send MONA to #{address}", to_status_id)
+			postTwitter("@#{username} Please send RIN to #{address}", to_status_id)
 		end
 	when /message( |　)(.*)/
-		if username == "palon7"
+		if username == $maintainer_screenname
 			puts "get?"
 			postTwitter("管理者からの伝言です！ 「" + $2 + "」")
 		end
@@ -350,27 +357,27 @@ end
 		tax = 0.005
 		total = amount + tax
 		address = $7
-		balance = $monacoind.getbalance(account,6)
+		balance = $coind.getbalance(account,6)
 		
-		$log.info("-> Withdraw #{amount}Mona + #{tax}Mona from @#{username}(#{balance}Mona) to #{address}")
+		$log.info("-> Withdraw #{amount}Rin + #{tax}Rin from @#{username}(#{balance}Rin) to #{address}")
 		
 		# 残高チェック
 		if balance < total
-			$log.info("-> Not enough MONA. (#{balance} < #{total})")
+			$log.info("-> Not enough RIN. (#{balance} < #{total})")
 			if isjp(username)
 				postTwitter(dice([
-	        		"@#{username} ごめんなさい、残高が足りないようです#{getps()} 引き出しには0.005Monaの手数料がかかることにも注意してください！ (現在#{balance}Mona)",
-	        		"@#{username} ごめんなさい、残高が足りません＞＜ 引き出しには0.005Monaの手数料がかかることにも注意してください！ (現在#{balance}Mona)",
-	        		"@#{username} ごめんなさい、残高が足りないみたいです#{getps()} 引き出しには0.005Monaの手数料がかかることにも注意してください！ (現在#{balance}Mona)"
+	        		"@#{username} ごめんなさい、残高が足りないようです#{getps()} 引き出しには0.005Rinの手数料がかかることにも注意してください！ (現在#{balance}Rin)",
+	        		"@#{username} ごめんなさい、残高が足りません＞＜ 引き出しには0.005Rinの手数料がかかることにも注意してください！ (現在#{balance}Rin)",
+	        		"@#{username} ごめんなさい、残高が足りないみたいです#{getps()} 引き出しには0.005Rinの手数料がかかることにも注意してください！ (現在#{balance}Rin)"
 				]),to_status_id)
 			else
-	        	postTwitter("@#{username} Not enough balance. Please note that required 0.005Mona fee when withdraw#{getps()}(Balance:#{balance}Mona)", to_status_id)
+	        	postTwitter("@#{username} Not enough balance. Please note that required 0.005Rin fee when withdraw#{getps()}(Balance:#{balance}Rin)", to_status_id)
 			end
 			return
 		end
 		
 		# アドレスチェック
-		validate = $monacoind.validateaddress(address)
+		validate = $coind.validateaddress(address)
 		if !validate['isvalid']
 			$log.info("-> Invalid address")
 			if isjp(username)
@@ -383,10 +390,10 @@ end
 
 		# go
 		$log.info("-> Sending...")
-		txid = $monacoind.sendfrom(account,address,amount)
+		txid = $coind.sendfrom(account,address,amount)
 
 		$log.info("-> Checking transaction...")
-		tx = $monacoind.gettransaction(txid)
+		tx = $coind.gettransaction(txid)
 
 		if tx
 			fee = tx['fee']
@@ -396,17 +403,17 @@ end
 			$log.info("-> No TX Fee.")
 		end
 
-		$monacoind.move(account,"taxpot",tax + fee)
+		$coind.move(account,"taxpot",tax + fee)
 		potsent = tax + fee
-		$log.info("-> Fee sent to taxpot: #{potsent}Mona (Real fee: #{fee}Mona)")
+		$log.info("-> Fee sent to taxpot: #{potsent}Rin (Real fee: #{fee}Rin)")
 		if isjp(username)
 			postTwitter(dice([
-				"@#{username} Monacoinを引き出しました！http://abe.monash.pw/tx/#{txid}",
-				"@#{username} さんのMonacoinを引き出しました！http://abe.monash.pw/tx/#{txid}",
-				"@#{username} Monacoinを引き出しましたっ！http://abe.monash.pw/tx/#{txid}"
+				"@#{username} Ringoを引き出しました！http://api.monaco-ex.org/abe/Ringo/tx/#{txid}",
+				"@#{username} さんのRingoを引き出しました！http://api.monaco-ex.org/abe/Ringo/tx/#{txid}",
+				"@#{username} Ringoを引き出しましたっ！http://api.monaco-ex.org/abe/Ringo/tx/#{txid}"
 			]),to_status_id)
 		else
-			postTwitter("@#{username} Withdraw complete. http://abe.monash.pw/tx/#{txid}", to_status_id)
+			postTwitter("@#{username} Withdraw complete. http://api.monaco-ex.org/abe/Ringo/tx/#{txid}", to_status_id)
 		end
     when /getcode/
         $log.info("Generate code...")
@@ -417,12 +424,12 @@ end
 	when /(tip)( |　)+@([A-z0-9_]+)( |　)+(([1-9]\d*|0)(\.\d+)?)/
 		$log.info("Sending...")
 		# 情報取得
-		balance = $monacoind.getbalance(account,6)	# 残高
+		balance = $coind.getbalance(account,6)	# 残高
 		from = username   # 送信元
         to = $3           # 送信先
         amount = $5.to_f  # 金額
 
-		$log.info("-> Send #{amount}mona from @#{from} to @#{to}")
+		$log.info("-> Send #{amount}rin from @#{from} to @#{to}")
 
 		# 額が0より小さかったら無視する
 		return if amount < 0
@@ -430,17 +437,17 @@ end
 
         # 残高チェック
 		if balance < amount
-			$log.info("-> Not enough Mona. (#{balance} < #{amount})")
+			$log.info("-> Not enough Rin. (#{balance} < #{amount})")
 			if isjp(username)
 		        postTwitter(dice([
-					"@#{username} ごめんなさい、残高が足りないみたいです＞＜ 6confirmされるまで残高が追加されないことにも注意してください！(現在の残高:#{balance}Mona)",
-					"@#{username} ごめんなさい、残高が足りないみたいです・・・ 6confirmされるまで残高が追加されないことにも注意してください！(現在の残高:#{balance}Mona)",
-					"@#{username} ごめんなさい、残高が足りないようです＞＜ 6confirmされるまで残高が追加されないことにも注意してください！(現在の残高:#{balance}Mona)",
-					"@#{username} ごめんなさい、残高が足りないようですっ＞＜ 6confirmされるまで残高が追加されないことにも注意してください！(現在の残高:#{balance}Mona)",
-					"@#{username} ごめんなさい、残高が足りないようです・・ 6confirmされるまで残高が追加されないことにも注意してください！(現在の残高:#{balance}Mona)"
+					"@#{username} ごめんなさい、残高が足りないみたいです＞＜ 6confirmされるまで残高が追加されないことにも注意してください！(現在の残高:#{balance}Rin)",
+					"@#{username} ごめんなさい、残高が足りないみたいです・・・ 6confirmされるまで残高が追加されないことにも注意してください！(現在の残高:#{balance}Rin)",
+					"@#{username} ごめんなさい、残高が足りないようです＞＜ 6confirmされるまで残高が追加されないことにも注意してください！(現在の残高:#{balance}Rin)",
+					"@#{username} ごめんなさい、残高が足りないようですっ＞＜ 6confirmされるまで残高が追加されないことにも注意してください！(現在の残高:#{balance}Rin)",
+					"@#{username} ごめんなさい、残高が足りないようです・・ 6confirmされるまで残高が追加されないことにも注意してください！(現在の残高:#{balance}Rin)"
 				]), to_status_id)
 			else
-	        	postTwitter("@#{username} Not enough balance. Please note that your balance apply when after 6 confirmed.#{getps()}(Balance:#{balance}Mona)", to_status_id)
+	        	postTwitter("@#{username} Not enough balance. Please note that your balance apply when after 6 confirmed.#{getps()}(Balance:#{balance}Rin)", to_status_id)
 			end
 		return
         end
@@ -457,11 +464,11 @@ end
 		end
 
 		# moveで送る
-        to_account = "tipmona-" + to_userdata.id.to_s
-		$monacoind.move(account,to_account,amount)
+        to_account = "throwrin-" + to_userdata.id.to_s
+		$coind.move(account,to_account,amount)
 		$log.info("-> Sent.")
 
-            if to_account == "tipmona-28724542"
+            if to_account == "throwrin-28724542"
                 userdata.affection = userdata.affection + (amount * 1).round
                 postTwitter(dice([
                     "@#{from} 開発者への寄付ですね！ありがとうございます。",
@@ -470,50 +477,50 @@ end
                     "@#{from} 開発のご支援ありがとうございます！"
                 ]), to_status_id)
                 userdata.save
-            elsif to_account == "tipmona-2350081615"
+            elsif to_account == $faucet_userid
                 userdata.donated = userdata.donated + amount
                 userdata.affection = userdata.affection + (amount * 0.5).round
                 userdata.save
 				if amount > 5
 					postTwitter(dice([
-						"@#{from} わぁ・・・こんなにたくさんありがとうございます！ #{amount}monaを寄付用ポットにお預かりしました！",
-						"@#{from} わぁ・・・こんなにたくさんありがとうございますっ！ #{amount}monaを寄付用ポットにお預かりしました！",
-						"@#{from} こんなにいいんですか！？ありがとうございます！ #{amount}monaを寄付用ポットにお預かりしました！",
-						"@#{from} こんなにいいんですか！？ありがとうございますっ！ #{amount}monaを寄付用ポットにお預かりしました！",
-						"@#{from} こんなにいっぱい・・・ありがとうございます！ #{amount}monaを寄付用ポットにお預かりしました！",
-						"@#{from} こんなにいっぱい・・・ありがとうございますっ！ #{amount}monaを寄付用ポットにお預かりしました！",
-						"@#{from} すごい・・・本当にありがとうございます！ #{amount}monaを寄付用ポットにお預かりしました！",
-						"@#{from} すごい・・・本当にありがとうございますっ！ #{amount}monaを寄付用ポットにお預かりしました！",
-						"@#{from} わぁ・・・ありがとうございます！大好きです！ #{amount}monaを寄付用ポットにお預かりしました！"
+						"@#{from} わぁ・・・こんなにたくさんありがとうございます！ #{amount}rinを寄付用ポットにお預かりしました！",
+						"@#{from} わぁ・・・こんなにたくさんありがとうございますっ！ #{amount}rinを寄付用ポットにお預かりしました！",
+						"@#{from} こんなにいいんですか！？ありがとうございます！ #{amount}rinを寄付用ポットにお預かりしました！",
+						"@#{from} こんなにいいんですか！？ありがとうございますっ！ #{amount}rinを寄付用ポットにお預かりしました！",
+						"@#{from} こんなにいっぱい・・・ありがとうございます！ #{amount}rinを寄付用ポットにお預かりしました！",
+						"@#{from} こんなにいっぱい・・・ありがとうございますっ！ #{amount}rinを寄付用ポットにお預かりしました！",
+						"@#{from} すごい・・・本当にありがとうございます！ #{amount}rinを寄付用ポットにお預かりしました！",
+						"@#{from} すごい・・・本当にありがとうございますっ！ #{amount}rinを寄付用ポットにお預かりしました！",
+						"@#{from} わぁ・・・ありがとうございます！大好きです！ #{amount}rinを寄付用ポットにお預かりしました！"
 					]), to_status_id)
 				else
 					postTwitter(dice([
-						"@#{from} ありがとうございます！ #{amount}monaを寄付用ポットにお預かりしました！",
-						"@#{from} わー、ありがとうございます！ #{amount}monaを寄付用ポットにお預かりしました！",
-						"@#{from} ありがとうございます！ #{amount}monaを寄付用ポットにお預かりしました！",
-						"@#{from} わー、ありがとうございます！ #{amount}monaを寄付用ポットにお預かりしました！",
-						"@#{from} ありがとうございます！ #{amount}monaを寄付用ポットにお預かりしましたっ！",
-						"@#{from} わー、ありがとうございます！ #{amount}monaを寄付用ポットにお預かりしましたっ！",
-						"@#{from} ありがとうございます！ #{amount}monaを寄付用ポットにお預かりしましたっ！",
-						"@#{from} わー、ありがとうございます！ #{amount}monaを寄付用ポットにお預かりしましたっ！"
+						"@#{from} ありがとうございます！ #{amount}rinを寄付用ポットにお預かりしました！",
+						"@#{from} わー、ありがとうございます！ #{amount}rinを寄付用ポットにお預かりしました！",
+						"@#{from} ありがとうございます！ #{amount}rinを寄付用ポットにお預かりしました！",
+						"@#{from} わー、ありがとうございます！ #{amount}rinを寄付用ポットにお預かりしました！",
+						"@#{from} ありがとうございます！ #{amount}rinを寄付用ポットにお預かりしましたっ！",
+						"@#{from} わー、ありがとうございます！ #{amount}rinを寄付用ポットにお預かりしましたっ！",
+						"@#{from} ありがとうございます！ #{amount}rinを寄付用ポットにお預かりしましたっ！",
+						"@#{from} わー、ありがとうございます！ #{amount}rinを寄付用ポットにお預かりしましたっ！"
 					]), to_status_id)
 				end
             end
 		if isjp(to)
 				postTwitter(dice([
-					"@#{from} さんから @#{to} さんにお届け物ですっ！ つ[#{amount}mona]",
-					"@#{from} さんから @#{to} さんにお届け物ですよっ！ つ[#{amount}mona]",
-					"@#{from} さんから @#{to} さんにお届け物です！ つ[#{amount}mona]",
-					"@#{from} さんから @#{to} さんにお届け物ですよー！ つ[#{amount}mona]",
-					"@#{from} さんの#{amount}monaを @#{to} さんにどんどこわっしょーいっ",
-					"@#{from} さんの#{amount}monaを @#{to} さんにどんどこわっしょーい！",
-					"@#{from} さんの#{amount}monaを @#{to} さんにどんどこわっしょーいっ！"
+					"@#{from} さんから @#{to} さんにお届け物ですっ！ つ[#{amount}rin]",
+					"@#{from} さんから @#{to} さんにお届け物ですよっ！ つ[#{amount}rin]",
+					"@#{from} さんから @#{to} さんにお届け物です！ つ[#{amount}rin]",
+					"@#{from} さんから @#{to} さんにお届け物ですよー！ つ[#{amount}rin]",
+					"@#{from} さんの#{amount}rinを @#{to} さんにどんどこわっしょーいっ",
+					"@#{from} さんの#{amount}rinを @#{to} さんにどんどこわっしょーい！",
+					"@#{from} さんの#{amount}rinを @#{to} さんにどんどこわっしょーいっ！"
 				]), to_status_id)
 		else
 			postTwitter(dice([
-				"@#{from} -san to @#{to} -san! sent #{amount}mona.",
-				"From @#{from} -san to @#{to} -san! sent #{amount}mona.",
-				"@#{from} -san's #{amount}mona sent to @#{to} -san!"
+				"@#{from} -san to @#{to} -san! sent #{amount}rin.",
+				"From @#{from} -san to @#{to} -san! sent #{amount}rin.",
+				"@#{from} -san's #{amount}rin sent to @#{to} -san!"
 			]),to_status_id)
 		end
     # ネタ系統
@@ -555,7 +562,7 @@ begin
 	pp "1"
 	follower_ids = []
 	pp "1.1"
-	$twitter.follower_ids("tipmona").each do |id|
+	$twitter.follower_ids("throwrin").each do |id|
 		pp "1.2"
 		follower_ids.push(id)
 	end
@@ -563,7 +570,7 @@ begin
 	pp "2"
 
 	friend_ids = []
-	$twitter.friend_ids("tipmona").each do |id|
+	$twitter.friend_ids("throwrin").each do |id|
 		friend_ids.push(id)
 	end
 	
@@ -604,9 +611,9 @@ end
 =begin
 class Bot
 
-  MY_SCREEN_NAME = "tipmona"
+  MY_SCREEN_NAME = "throwrin"
 
-  BOT_USER_AGENT = "monacoin tip bot @#{MY_SCREEN_NAME}"
+  BOT_USER_AGENT = "ringo tip bot @#{MY_SCREEN_NAME}"
 
   def initialize
     @q = Queue.new
