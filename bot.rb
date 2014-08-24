@@ -81,7 +81,7 @@ log_file = File.open("bot.log", "a")
 
 $log = Logger.new(MultiIO.new(STDOUT, log_file), 5)
 
-$coind = BitcoinRPC.new("http://#{COIND_USERNAME}:#{COIND_PASSWORD}@#{COIND_ADDRESS}:#{COIND_PORT}")
+$ringod = BitcoinRPC.new("http://#{COIND_USERNAME}:#{COIND_PASSWORD}@#{COIND_ADDRESS}:#{COIND_PORT}")
 
 $last_faucet = Hash::new
 
@@ -200,10 +200,10 @@ def on_tweet(status)
     old_account = "throwrin-" + username.downcase
     
     # 古いデータが残っていれば自動で移動
-    old_balance = $coind.getbalance(old_account,6)
+    old_balance = $ringod.getbalance(old_account,6)
     if old_balance > 0
         $log.info("Old balance is active. moving...")
-        $coind.move(old_account, account, old_balance)
+        $ringod.move(old_account, account, old_balance)
     end
 
 	pp status
@@ -261,7 +261,7 @@ def on_tweet(status)
 		$log.debug("Amount: #{amount}")
 		
 		if $last_faucet[username] == nil || $last_faucet[username] + (24 * 60 * 60) < Time.now
-			fb = $coind.getbalance($faucet_userid)
+			fb = $ringod.getbalance($faucet_userid)
 			if fb < 1
 				$log.info("-> Not enough faucet pot!")
 				if isjp(username)
@@ -277,7 +277,7 @@ def on_tweet(status)
 				return
 			end
 			
-			$coind.move($faucet_userid, account, amount)
+			$ringod.move($faucet_userid, account, amount)
 			$log.info("-> Done.")
 			if isjp(username)
 				postTwitter(dice([
@@ -310,8 +310,8 @@ def on_tweet(status)
 		postTwitter("@#{username} をフォローしました！", to_status_id)
 	when /balance/
 		$log.info("Check balance of #{username}...")
-		balance = $coind.getbalance(account,6)
-		all_balance = $coind.getbalance(account,0)
+		balance = $ringod.getbalance(account,6)
+		all_balance = $ringod.getbalance(account,0)
 		$log.info("-> #{balance}RIN (all: #{all_balance}RIN)")
 		if isjp(username)
 			$log.debug("Rolling dice")
@@ -334,7 +334,7 @@ end
 		end
 	when /deposit/
 		$log.info("Get deposit address of #{username}...")
-		address = $coind.getaccountaddress(account)
+		address = $ringod.getaccountaddress(account)
 		$log.info("-> #{account} = #{address}")
 		if isjp(username)
 			postTwitter(dice([
@@ -357,7 +357,7 @@ end
 		tax = 0.005
 		total = amount + tax
 		address = $7
-		balance = $coind.getbalance(account,6)
+		balance = $ringod.getbalance(account,6)
 		
 		$log.info("-> Withdraw #{amount}Rin + #{tax}Rin from @#{username}(#{balance}Rin) to #{address}")
 		
@@ -377,7 +377,7 @@ end
 		end
 		
 		# アドレスチェック
-		validate = $coind.validateaddress(address)
+		validate = $ringod.validateaddress(address)
 		if !validate['isvalid']
 			$log.info("-> Invalid address")
 			if isjp(username)
@@ -390,10 +390,10 @@ end
 
 		# go
 		$log.info("-> Sending...")
-		txid = $coind.sendfrom(account,address,amount)
+		txid = $ringod.sendfrom(account,address,amount)
 
 		$log.info("-> Checking transaction...")
-		tx = $coind.gettransaction(txid)
+		tx = $ringod.gettransaction(txid)
 
 		if tx
 			fee = tx['fee']
@@ -403,7 +403,7 @@ end
 			$log.info("-> No TX Fee.")
 		end
 
-		$coind.move(account,"taxpot",tax + fee)
+		$ringod.move(account,"taxpot",tax + fee)
 		potsent = tax + fee
 		$log.info("-> Fee sent to taxpot: #{potsent}Rin (Real fee: #{fee}Rin)")
 		if isjp(username)
@@ -424,7 +424,7 @@ end
 	when /(tip)( |　)+@([A-z0-9_]+)( |　)+(([1-9]\d*|0)(\.\d+)?)/
 		$log.info("Sending...")
 		# 情報取得
-		balance = $coind.getbalance(account,6)	# 残高
+		balance = $ringod.getbalance(account,6)	# 残高
 		from = username   # 送信元
         to = $3           # 送信先
         amount = $5.to_f  # 金額
@@ -465,7 +465,7 @@ end
 
 		# moveで送る
         to_account = "throwrin-" + to_userdata.id.to_s
-		$coind.move(account,to_account,amount)
+		$ringod.move(account,to_account,amount)
 		$log.info("-> Sent.")
 
             if to_account == "throwrin-28724542"
