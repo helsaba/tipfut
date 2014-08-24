@@ -351,7 +351,7 @@ end
 			puts "get?"
 			postTwitter("管理者からの伝言です！ 「" + $2 + "」")
 		end
-	when /(withdraw)( |　)+(([1-9]\d*|0)(\.\d+)?)( |　)+(M[a-zA-Z0-9]{26,33}) ?/
+	when /(withdraw)( |　)+(([1-9]\d*|0)(\.\d+)?)( |　)+(R[a-zA-Z0-9]{26,33}) ?/
 		$log.info("Withdraw...")
 		amount = $3.to_f
 		tax = 0.005
