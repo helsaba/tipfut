@@ -158,7 +158,6 @@ end
 #ツイートなどを含むメッセージを受けたときの処理
 def on_tweet(status)
   if !status.text.index("RT") && !status.text.index("QT") && status.user.screen_name != "throwrin"
- 	#   checkfollow()
     $log.info("Tweet from #{status.user.screen_name}: #{status.text}")
 
 	if !status.text.index("@throwrin")
@@ -511,43 +510,6 @@ end
     when /info/
         postTwitter("@#{username} 寄付総額: #{userdata.donated} 好感度:#{userdata.affection}")
     end
-end
-end
-
-def checkfollow()
-begin
-	$log.debug("Check follow...")
-
-
-	pp "1"
-	follower_ids = []
-	pp "1.1"
-	$twitter.follower_ids("throwrin").each do |id|
-		pp "1.2"
-		follower_ids.push(id)
-	end
-	
-	pp "2"
-
-	friend_ids = []
-	$twitter.friend_ids("throwrin").each do |id|
-		friend_ids.push(id)
-	end
-	
-	pp 3
-	
-	if follower_ids == friend_ids
-		return
-	end
-	
-	pp 4
-
-	fol = follower_ids - friend_idsgin
-	$twitter.follow(fol)
-	
-	$log.debug("Done...")
-rescue
-    puts "Error while sending: #{exc}: [text]#{text}"
 end
 end
 
