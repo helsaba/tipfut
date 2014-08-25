@@ -63,7 +63,6 @@ $faucet_userid='throwrin-2761034186'
 $maintainer_screenname='MonacoEx'
 $maintainer_userid='throwrin-2611149793'
 
-# DB接続
 ActiveRecord::Base.configurations = YAML.load_file('database.yml')
 ActiveRecord::Base.establish_connection("production")
 
@@ -87,11 +86,6 @@ $last_faucet = Hash::new
 
 $random = Random.new()
 
-=begin
-TweetStream.configure do |config|
-end
-=end
-
 client = Twitter::Streaming::Client.new do |config|
   config.consumer_key        = CONSUMER_KEY
   config.consumer_secret     = CONSUMER_SECRET
@@ -101,7 +95,6 @@ end
 	
 def dice(message)
 	length = message.length
-	# 1つも要素がないなら返す
 	if length < 1
 		$log.warn("Dice called but array is null!")
 		return ""
@@ -109,10 +102,9 @@ def dice(message)
 		$log.warn("Dice called and only one!")
 		return message
 	end
-	# 適当に選んで・・・
 	messageArrayIndex = $random.rand(length-1)
 	$log.debug("Dice selected: " + messageArrayIndex.to_s)
-	# 返す
+
 	return message[messageArrayIndex]
 end
 
@@ -163,24 +155,6 @@ def get_user(screen_name)
 end
 
 
-=begin
-# 稼働時の処理（ここではサーバ接続したことを表示）
-client.on_inited do
-  $log.info('Connected to twitter')
-end
-
-#接続時に送られるフォロワーリストを受けたときの処理
-client.on_friends do |friends|
-  $log.info("Recieved a friends list")
-# postTwitter("@palon7 Throwrin " + $ver + " ready")
-end
-
-#ツイート削除を含むメッセージを受けたときの処理
-client.on_delete do |status_id, user_id|
-  $log.info("Recieve a delete message / status_id: #{status_id}, user_id: #{user_id}")
-end
-=end
-
 #ツイートなどを含むメッセージを受けたときの処理
 def on_tweet(status)
   if !status.text.index("RT") && !status.text.index("QT") && status.user.screen_name != "throwrin"
@@ -206,14 +180,10 @@ def on_tweet(status)
         $ringod.move(old_account, account, old_balance)
     end
 
-	pp status
-	# ステータスID
 	to_status_id = status.id
 	
 	return if username == "throwrin"
     userdata = get_user(username)
-	
-	# トランザクション処理
 	
     case message
 	when /RT.*@.*/
@@ -361,7 +331,6 @@ end
 		
 		$log.info("-> Withdraw #{amount}Rin + #{tax}Rin from @#{username}(#{balance}Rin) to #{address}")
 		
-		# 残高チェック
 		if balance < total
 			$log.info("-> Not enough RIN. (#{balance} < #{total})")
 			if isjp(username)
@@ -376,7 +345,6 @@ end
 			return
 		end
 		
-		# アドレスチェック
 		validate = $ringod.validateaddress(address)
 		if !validate['isvalid']
 			$log.info("-> Invalid address")
@@ -388,7 +356,6 @@ end
 			puts "Invalid address."
 		end
 
-		# go
 		$log.info("-> Sending...")
 		txid = $ringod.sendfrom(account,address,amount)
 
@@ -423,19 +390,17 @@ end
         userdata.save
 	when /(tip)( |　)+@([A-z0-9_]+)( |　)+(([1-9]\d*|0)(\.\d+)?)/
 		$log.info("Sending...")
-		# 情報取得
-		balance = $ringod.getbalance(account,6)	# 残高
-		from = username   # 送信元
-        to = $3           # 送信先
-        amount = $5.to_f  # 金額
+
+		balance = $ringod.getbalance(account,6)
+		from = username
+        to = $3
+        amount = $5.to_f
 
 		$log.info("-> Send #{amount}rin from @#{from} to @#{to}")
 
-		# 額が0より小さかったら無視する
 		return if amount < 0
 
 
-        # 残高チェック
 		if balance < amount
 			$log.info("-> Not enough Rin. (#{balance} < #{amount})")
 			if isjp(username)
@@ -452,18 +417,13 @@ end
 		return
         end
 		
-		# 送信先ユーザの存在をチェック
 		begin
-			# ユーザ情報を取得してみる
 			to_userdata = $twitter.user(to)
-		rescue Twitter::Error::NotFound # NotFoundなら
-			# エラーメッセージ送信
+		rescue Twitter::Error::NotFound
 			postTwitter("@#{username} 申し訳ありません！#{to}というユーザー名は存在しないようです。", to_status_id)
-			# 送金をスキップする
 			return
 		end
 
-		# moveで送る
         to_account = "throwrin-" + to_userdata.id.to_s
 		$ringod.move(account,to_account,amount)
 		$log.info("-> Sent.")
@@ -598,44 +558,3 @@ client.user do |object|
         on_tweet(object)
     end
 end
-=begin
-begin
-client.userstream do |object|
-end
-rescue
-    puts "Error while sending: #{exc}: [text]#{text}"
-end   
-=end
-
-
-=begin
-class Bot
-
-  MY_SCREEN_NAME = "throwrin"
-
-  BOT_USER_AGENT = "ringo tip bot @#{MY_SCREEN_NAME}"
-
-  def initialize
-    @q = Queue.new
-    Thread.start do
-	  client.user do |object|
-	    puts "recieve a message / class: #{object.class}"
-	    case object
-	    when Twitter::Tweet
-	      @q.push(object.text)
-	    end
-	  end
-	end
-
-    puts "Bot System is ready"	
-  end
-
-  def run
-    loop do
-      unless @q.empty?
-        puts @q.pop
-      end
-    end
-  end
-end
-=end
