@@ -335,12 +335,12 @@ end
 			$log.info("-> Not enough RIN. (#{balance} < #{total})")
 			if isjp(username)
 				postTwitter(dice([
-	        		"@#{username} ごめんなさい、残高が足りないようです#{getps()} 引き出しには0.005Rinの手数料がかかることにも注意してください！ (現在#{balance}Rin)",
-	        		"@#{username} ごめんなさい、残高が足りません＞＜ 引き出しには0.005Rinの手数料がかかることにも注意してください！ (現在#{balance}Rin)",
-	        		"@#{username} ごめんなさい、残高が足りないみたいです#{getps()} 引き出しには0.005Rinの手数料がかかることにも注意してください！ (現在#{balance}Rin)"
+	        		"@#{username} ごめんなさい、残高が足りないようです#{getps()} 引き出しには#{tax}Rinの手数料がかかることにも注意してください！ (現在#{balance}Rin)",
+	        		"@#{username} ごめんなさい、残高が足りません＞＜ 引き出しには#{tax}Rinの手数料がかかることにも注意してください！ (現在#{balance}Rin)",
+	        		"@#{username} ごめんなさい、残高が足りないみたいです#{getps()} 引き出しには#{tax}Rinの手数料がかかることにも注意してください！ (現在#{balance}Rin)"
 				]),to_status_id)
 			else
-	        	postTwitter("@#{username} Not enough balance. Please note that required 0.005Rin fee when withdraw#{getps()}(Balance:#{balance}Rin)", to_status_id)
+	        	postTwitter("@#{username} Not enough balance. Please note that required #{tax}Rin fee when withdraw#{getps()}(Balance:#{balance}Rin)", to_status_id)
 			end
 			return
 		end
