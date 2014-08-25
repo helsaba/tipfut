@@ -120,7 +120,7 @@ def isjp(username)
 	end
 end
 
-def postTwitter(text, statusid = false)
+def post_tweet(text, statusid = false)
   begin
     if statusid
 	    $twitter.update(text, :in_reply_to_status_id => statusid)
@@ -196,18 +196,18 @@ def on_tweet(status)
 		BAN_USER.each do |v|
 			if username == v
 				$log.info("-> Banned user.")
-				postTwitter("@#{username} あなたのアカウントはfaucet機能を停止されています。ご不明な点があれば@#{$maintainer_screenname}へご連絡ください。", to_status_id)
+				post_tweet("@#{username} あなたのアカウントはfaucet機能を停止されています。ご不明な点があれば@#{$maintainer_screenname}へご連絡ください。", to_status_id)
 			end
 		end
 		# Tweet count
 		if $twitter.user(username).statuses_count < 25
 			$log.info("-> Not enough tweet!");
 			if isjp(username)
-				postTwitter(dice([
+				post_tweet(dice([
 					"@#{username} ごめんなさい、まだあなたのアカウントのツイート数が少なすぎるようです#{getps()} Twitterをもっと使ってからもう一度お願いします！"
 				]), to_status_id)
 			else
-				postTwitter("@#{username} Your account hasn't much tweet#{getps()}", to_status_id)
+				post_tweet("@#{username} Your account hasn't much tweet#{getps()}", to_status_id)
 			end
 			return
 		end
@@ -217,11 +217,11 @@ def on_tweet(status)
 		if r_need_time > Time.now
 			$log.info("-> Not enough account created time!");
 			if isjp(username)
-				postTwitter(dice([
+				post_tweet(dice([
 					"@#{username} ごめんなさい、まだあなたはアカウントを作成してから二週間以上経ってないみたいです#{getps()}"
 				]), to_status_id)
 			else
-				postTwitter("@#{username} Your account must be created at more than 2 weeks ago#{getps()}", to_status_id)
+				post_tweet("@#{username} Your account must be created at more than 2 weeks ago#{getps()}", to_status_id)
 			end
 			return
 		end		
@@ -234,14 +234,14 @@ def on_tweet(status)
 			if fb < 1
 				$log.info("-> Not enough faucet pot!")
 				if isjp(username)
-					postTwitter(dice([
+					post_tweet(dice([
 						"@#{username} ごめんなさい、配布用ポットの中身が足りません＞＜ @rin_faucetに送金してもらえると嬉しいですっ！",
 						"@#{username} ごめんなさい、配布用ポットにRINが入ってないみたいです＞＜ @rin_faucetに送金してもらえると嬉しいですっ！",
 						"@#{username} ごめんなさい、配布用ポットの中身がもうありません＞＜ @rin_faucetに送金してもらえると嬉しいですっ！",
 						"@#{username} ごめんなさい、配布用ポットの中身がないみたいですっ＞＜ @rin_faucetに送金してもらえると嬉しいですっ！"
 					]), to_status_id)
 				else
-					postTwitter("@#{username} Sorry, there is no more RIN in faucet (><) Please tip to @rin_faucet#{getps()}", to_status_id)
+					post_tweet("@#{username} Sorry, there is no more RIN in faucet (><) Please tip to @rin_faucet#{getps()}", to_status_id)
 				end
 				return
 			end
@@ -249,34 +249,34 @@ def on_tweet(status)
 			$ringod.move($faucet_userid, account, amount)
 			$log.info("-> Done.")
 			if isjp(username)
-				postTwitter(dice([
+				post_tweet(dice([
 					"@#{username} さんに#{amount}Rinプレゼントっ！",
 					"@#{username} さんに#{amount}Rinをプレゼント！",
 					"@#{username} さんに#{amount}Rinをプレゼントしましたっ！",
 					"@#{username} さんに#{amount}Rinプレゼントしました！！"
 				]), to_status_id)
 			else
-				postTwitter("Present for @#{username} -san! Sent #{amount}Rin!", to_status_id)
+				post_tweet("Present for @#{username} -san! Sent #{amount}Rin!", to_status_id)
 			end
 			$last_faucet[username] = Time.now
 		else
 			$log.info("-> Already received in last 24 hours!")
 			if isjp(username)
-				postTwitter(dice([
+				post_tweet(dice([
 					"@#{username} まだ最後の配布から24時間経ってないようです・・・ごめんなさい！",
 					"@#{username} まだ最後の配布から24時間経ってないようです・・・・ごめんなさい！",
 					"@#{username} まだ最後の配布から24時間経ってないみたいです・・・ごめんなさい！",
 					"@#{username} まだ最後の配布から24時間経ってないみたいです・・・・ごめんなさい！"
 				]), to_status_id)
 			else
-				postTwitter("@#{username} You have already received RIN in the last 24 hours#{getps()}", to_status_id)
+				post_tweet("@#{username} You have already received RIN in the last 24 hours#{getps()}", to_status_id)
 			end
 		end
 	when /(Follow|follow|フォロー|ふぉろー)して/
 		$log.info("Following #{username}...")
 		pp $twitter.follow(username)
 		$log.info("-> Followed.")
-		postTwitter("@#{username} をフォローしました！", to_status_id)
+		post_tweet("@#{username} をフォローしました！", to_status_id)
 	when /balance/
 		$log.info("Check balance of #{username}...")
 		balance = $ringod.getbalance(account,6)
@@ -294,31 +294,31 @@ begin
 				"@#{username} さんの残高は #{balance} Rinですよっ！ (confirm中残高との合計: #{all_balance} Rin)"
 			])
 			$log.debug("Send: @#{status}")
-			postTwitter(status,to_status_id)
+			post_tweet(status,to_status_id)
 rescue
  		   $log.error("#{exc}: [text]#{text}")
 end   
 		else
-			postTwitter("@#{username} 's balance is #{balance} Rin#{getps()} (Total with confirming balance: #{all_balance} Rin)", to_status_id)
+			post_tweet("@#{username} 's balance is #{balance} Rin#{getps()} (Total with confirming balance: #{all_balance} Rin)", to_status_id)
 		end
 	when /deposit/
 		$log.info("Get deposit address of #{username}...")
 		address = $ringod.getaccountaddress(account)
 		$log.info("-> #{account} = #{address}")
 		if isjp(username)
-			postTwitter(dice([
+			post_tweet(dice([
 				"@#{username} #{address} にRingoを送金してください！",
 				"@#{username} #{address} にRingoを送ってください！",
 				"@#{username} #{address} にRingoを送金してくださいっ！",
 				"@#{username} #{address} にRingoを送ってくださいっ！"
 			]), to_status_id)
 		else
-			postTwitter("@#{username} Please send RIN to #{address}", to_status_id)
+			post_tweet("@#{username} Please send RIN to #{address}", to_status_id)
 		end
 	when /message( |　)(.*)/
 		if username == $maintainer_screenname
 			puts "get?"
-			postTwitter("管理者からの伝言です！ 「" + $2 + "」")
+			post_tweet("管理者からの伝言です！ 「" + $2 + "」")
 		end
 	when /(withdraw)( |　)+(([1-9]\d*|0)(\.\d+)?)( |　)+(R[a-zA-Z0-9]{26,33}) ?/
 		$log.info("Withdraw...")
@@ -333,13 +333,13 @@ end
 		if balance < total
 			$log.info("-> Not enough RIN. (#{balance} < #{total})")
 			if isjp(username)
-				postTwitter(dice([
+				post_tweet(dice([
 	        		"@#{username} ごめんなさい、残高が足りないようです#{getps()} 引き出しには#{tax}Rinの手数料がかかることにも注意してください！ (現在#{balance}Rin)",
 	        		"@#{username} ごめんなさい、残高が足りません＞＜ 引き出しには#{tax}Rinの手数料がかかることにも注意してください！ (現在#{balance}Rin)",
 	        		"@#{username} ごめんなさい、残高が足りないみたいです#{getps()} 引き出しには#{tax}Rinの手数料がかかることにも注意してください！ (現在#{balance}Rin)"
 				]),to_status_id)
 			else
-	        	postTwitter("@#{username} Not enough balance. Please note that required #{tax}Rin fee when withdraw#{getps()}(Balance:#{balance}Rin)", to_status_id)
+	        	post_tweet("@#{username} Not enough balance. Please note that required #{tax}Rin fee when withdraw#{getps()}(Balance:#{balance}Rin)", to_status_id)
 			end
 			return
 		end
@@ -348,9 +348,9 @@ end
 		if !validate['isvalid']
 			$log.info("-> Invalid address")
 			if isjp(username)
-				postTwitter("@#{username} ごめんなさい、アドレスが間違っているみたいです#{getps()}", to_status_id)
+				post_tweet("@#{username} ごめんなさい、アドレスが間違っているみたいです#{getps()}", to_status_id)
 			else
-				postTwitter("@#{username} Invalid address#{getps()}",to_status_id)
+				post_tweet("@#{username} Invalid address#{getps()}",to_status_id)
 			end
 			puts "Invalid address."
 		end
@@ -373,18 +373,18 @@ end
 		potsent = tax + fee
 		$log.info("-> Fee sent to taxpot: #{potsent}Rin (Real fee: #{fee}Rin)")
 		if isjp(username)
-			postTwitter(dice([
+			post_tweet(dice([
 				"@#{username} Ringoを引き出しました！http://api.monaco-ex.org/abe/Ringo/tx/#{txid}",
 				"@#{username} さんのRingoを引き出しました！http://api.monaco-ex.org/abe/Ringo/tx/#{txid}",
 				"@#{username} Ringoを引き出しましたっ！http://api.monaco-ex.org/abe/Ringo/tx/#{txid}"
 			]),to_status_id)
 		else
-			postTwitter("@#{username} Withdraw complete. http://api.monaco-ex.org/abe/Ringo/tx/#{txid}", to_status_id)
+			post_tweet("@#{username} Withdraw complete. http://api.monaco-ex.org/abe/Ringo/tx/#{txid}", to_status_id)
 		end
     when /getcode/
         $log.info("Generate code...")
         inv_code = Digest::MD5.hexdigest(idstr)[0,10]
-        postTwitter("@#{username} 招待コード: #{inv_code}", to_status_id)
+        post_tweet("@#{username} 招待コード: #{inv_code}", to_status_id)
         userdata.register_code = inv_code
         userdata.save
 	when /(tip)( |　)+@([A-z0-9_]+)( |　)+(([1-9]\d*|0)(\.\d+)?)/
@@ -403,7 +403,7 @@ end
 		if balance < amount
 			$log.info("-> Not enough Rin. (#{balance} < #{amount})")
 			if isjp(username)
-		        postTwitter(dice([
+		        post_tweet(dice([
 					"@#{username} ごめんなさい、残高が足りないみたいです＞＜ 6confirmされるまで残高が追加されないことにも注意してください！(現在の残高:#{balance}Rin)",
 					"@#{username} ごめんなさい、残高が足りないみたいです・・・ 6confirmされるまで残高が追加されないことにも注意してください！(現在の残高:#{balance}Rin)",
 					"@#{username} ごめんなさい、残高が足りないようです＞＜ 6confirmされるまで残高が追加されないことにも注意してください！(現在の残高:#{balance}Rin)",
@@ -411,7 +411,7 @@ end
 					"@#{username} ごめんなさい、残高が足りないようです・・ 6confirmされるまで残高が追加されないことにも注意してください！(現在の残高:#{balance}Rin)"
 				]), to_status_id)
 			else
-	        	postTwitter("@#{username} Not enough balance. Please note that your balance apply when after 6 confirmed.#{getps()}(Balance:#{balance}Rin)", to_status_id)
+	        	post_tweet("@#{username} Not enough balance. Please note that your balance apply when after 6 confirmed.#{getps()}(Balance:#{balance}Rin)", to_status_id)
 			end
 		return
         end
@@ -419,7 +419,7 @@ end
 		begin
 			to_userdata = $twitter.user(to)
 		rescue Twitter::Error::NotFound
-			postTwitter("@#{username} 申し訳ありません！#{to}というユーザー名は存在しないようです。", to_status_id)
+			post_tweet("@#{username} 申し訳ありません！#{to}というユーザー名は存在しないようです。", to_status_id)
 			return
 		end
 
@@ -429,7 +429,7 @@ end
 
             if to_account == "throwrin-28724542"
                 userdata.affection = userdata.affection + (amount * 1).round
-                postTwitter(dice([
+                post_tweet(dice([
                     "@#{from} 開発者への寄付ですね！ありがとうございます。",
                     "@#{from} 開発者への寄付、ありがとうございます。",
                     "@#{from} 開発へのご支援ありがとうございます！",
@@ -441,7 +441,7 @@ end
                 userdata.affection = userdata.affection + (amount * 0.5).round
                 userdata.save
 				if amount > 5
-					postTwitter(dice([
+					post_tweet(dice([
 						"@#{from} わぁ・・・こんなにたくさんありがとうございます！ #{amount}rinを寄付用ポットにお預かりしました！",
 						"@#{from} わぁ・・・こんなにたくさんありがとうございますっ！ #{amount}rinを寄付用ポットにお預かりしました！",
 						"@#{from} こんなにいいんですか！？ありがとうございます！ #{amount}rinを寄付用ポットにお預かりしました！",
@@ -453,7 +453,7 @@ end
 						"@#{from} わぁ・・・ありがとうございます！大好きです！ #{amount}rinを寄付用ポットにお預かりしました！"
 					]), to_status_id)
 				else
-					postTwitter(dice([
+					post_tweet(dice([
 						"@#{from} ありがとうございます！ #{amount}rinを寄付用ポットにお預かりしました！",
 						"@#{from} わー、ありがとうございます！ #{amount}rinを寄付用ポットにお預かりしました！",
 						"@#{from} ありがとうございます！ #{amount}rinを寄付用ポットにお預かりしました！",
@@ -466,7 +466,7 @@ end
 				end
             end
 		if isjp(to)
-				postTwitter(dice([
+				post_tweet(dice([
 					"@#{from} さんから @#{to} さんにお届け物ですっ！ つ[#{amount}rin]",
 					"@#{from} さんから @#{to} さんにお届け物ですよっ！ つ[#{amount}rin]",
 					"@#{from} さんから @#{to} さんにお届け物です！ つ[#{amount}rin]",
@@ -476,7 +476,7 @@ end
 					"@#{from} さんの#{amount}rinを @#{to} さんにどんどこわっしょーいっ！"
 				]), to_status_id)
 		else
-			postTwitter(dice([
+			post_tweet(dice([
 				"@#{from} -san to @#{to} -san! sent #{amount}rin.",
 				"From @#{from} -san to @#{to} -san! sent #{amount}rin.",
 				"@#{from} -san's #{amount}rin sent to @#{to} -san!"
@@ -485,30 +485,30 @@ end
     # ネタ系統
 	when /((結婚|けっこん|ケッコン))|marry ?me/
         if userdata.affection >= 500
-            postTwitter(dice([
+            post_tweet(dice([
                 "@#{username} は、はい！",
                 "@#{username} 喜んで！"
             ]), to_status_id)
         elsif userdata.affection >= 300
-            postTwitter(dice([
+            post_tweet(dice([
                 "@#{username} そ、そんなこと言われても…///",
                 "@#{username} 考えさせてください。",
                 "@#{username} 少し考えさせてください。",
                 "@#{username} 考えさせてください…"
             ]), to_status_id)
         elsif userdata.affection >= 100
-            postTwitter(dice([
+            post_tweet(dice([
                 "@#{username} お気持ちは嬉しいですが、ごめんなさい…",
                 "@#{username} 嬉しいけど、ごめんなさい。"
             ]), to_status_id)
         else
-    		postTwitter(dice([
+    		post_tweet(dice([
     			"@#{username} ごめんなさい！",
     			"@#{username} ごめんなさい・・・"
     		]), to_status_id)
         end
     when /info/
-        postTwitter("@#{username} 寄付総額: #{userdata.donated} 好感度:#{userdata.affection}")
+        post_tweet("@#{username} 寄付総額: #{userdata.donated} 好感度:#{userdata.affection}")
     end
 end
 end
