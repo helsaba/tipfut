@@ -57,8 +57,6 @@ require 'logger'
 require 'yaml'
 require 'digest/md5'
 
-require './config.rb'
-
 $faucet_userid='throwrin-2761034186'
 $maintainer_screenname='MonacoEx'
 $maintainer_userid='throwrin-2611149793'
@@ -78,17 +76,22 @@ $last_faucet = Hash::new
 $random = Random.new()
 
 class TipCryptCurrency::Bot
+    def initialize
+      @client = Twitter::Streaming::Client.new do |config|
+        config.consumer_key        = ENV['TWITTER_CONSUMER_KEY']
+        config.consumer_secret     = ENV['TWITTER_CONSUMER_SECRET']
+        config.access_token        = ENV['ACCESS_TOKEN']
+        config.access_token_secret = ENV['ACCESS_TOKEN_SECRET']
+      end
 
-  def initialize
-    @client = Twitter::Streaming::Client.new do |config|
-      config.consumer_key        = CONSUMER_KEY
-      config.consumer_secret     = CONSUMER_SECRET
-      config.access_token         = ACCESS_TOKEN
-      config.access_token_secret  = ACCESS_TOKEN_SECRET
+      COIND_ADDRESS = ENV['COIND_ADDRESS'] || '127.0.0.1'
+      COIND_RPCPORT = ENV['COIND_RPCPORT']
+      COIND_USERNAME = ENV['COIND_USERNAME']
+      COIND_PASSWORD = ENV['COIND_PASSWORD']
+      coind_url = "http://#{COIND_USERNAME}:#{COIND_PASSWORD}@#{COIND_ADDRESS}:#{COIND_PORT}"
+      @coind = BitcoinRPC.new(coind_url)
     end
 
-    @coind = BitcoinRPC.new("http://#{COIND_USERNAME}:#{COIND_PASSWORD}@#{COIND_ADDRESS}:#{COIND_PORT}")
-  end
 
   def dice(message)
     length = message.length

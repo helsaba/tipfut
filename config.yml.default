@@ -1,0 +1,12 @@
+### Config ###
+- global:
+ - account_prefix: thorowrin-
+- writter
+  - faucet:
+    - userid: 
+  - maintainer:
+    - userid:
+    - screenname:
+  - developer:
+    - userid:
+    - screenname:
