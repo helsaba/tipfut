@@ -75,23 +75,7 @@ $last_faucet = Hash::new
 
 $random = Random.new()
 
-class TipCryptCurrency::Bot
-    def initialize
-      @client = Twitter::Streaming::Client.new do |config|
-        config.consumer_key        = ENV['TWITTER_CONSUMER_KEY']
-        config.consumer_secret     = ENV['TWITTER_CONSUMER_SECRET']
-        config.access_token        = ENV['ACCESS_TOKEN']
-        config.access_token_secret = ENV['ACCESS_TOKEN_SECRET']
-      end
-
-      COIND_ADDRESS = ENV['COIND_ADDRESS'] || '127.0.0.1'
-      COIND_RPCPORT = ENV['COIND_RPCPORT']
-      COIND_USERNAME = ENV['COIND_USERNAME']
-      COIND_PASSWORD = ENV['COIND_PASSWORD']
-      coind_url = "http://#{COIND_USERNAME}:#{COIND_PASSWORD}@#{COIND_ADDRESS}:#{COIND_PORT}"
-      @coind = BitcoinRPC.new(coind_url)
-    end
-
+module TipCryptCurrency
 
   def dice(message)
     length = message.length
@@ -154,16 +138,34 @@ class TipCryptCurrency::Bot
     end
   end
 
+  class Bot
+    include TipCryptCurrency
 
-  #ツイートなどを含むメッセージを受けたときの処理
-  def on_tweet(status)
-    if !status.text.index("RT") && !status.text.index("QT") && status.user.screen_name != "throwrin"
-      $log.info("Tweet from #{status.user.screen_name}: #{status.text}")
+    def initialize
+      @client = Twitter::Streaming::Client.new do |config|
+        config.consumer_key        = ENV['TWITTER_CONSUMER_KEY']
+        config.consumer_secret     = ENV['TWITTER_CONSUMER_SECRET']
+        config.access_token        = ENV['ACCESS_TOKEN']
+        config.access_token_secret = ENV['ACCESS_TOKEN_SECRET']
+      end
 
-      if !status.text.index("@throwrin")
+      coind_address = ENV['COIND_ADDRESS'] || '127.0.0.1'
+      coind_rpcport = ENV['COIND_RPCPORT']
+      coind_username = ENV['COIND_USERNAME']
+      coind_password = ENV['COIND_PASSWORD']
+      coind_url = "http://#{coind_username}:#{coind_password}@#{coind_address}:#{coind_port}"
+      @coind = BitcoinRPC.new(coind_url)
+    end
+
+    #ツイートなどを含むメッセージを受けたときの処理
+    def on_tweet(status)
+      if status.text.index("RT") || !status.text.index("QT") || status.user.screen_name == "throwrin"
         return
       end
 
+      $log.info("Tweet from #{status.user.screen_name}: #{status.text}")
+
+      return if !status.text.index("@throwrin")
       message = status.text.gsub(/@throwrin ?/, "")
       $log.info("Message: #{message}")
 
@@ -511,13 +513,13 @@ class TipCryptCurrency::Bot
         post_tweet("@#{username} 寄付総額: #{userdata.donated} 好感度:#{userdata.affection}")
       end
     end
-  end
 
-  def run
-    @client.user do |object|
-      case object
-      when Twitter::Tweet
-        on_tweet(object)
+    def run
+      @client.user do |object|
+        case object
+        when Twitter::Tweet
+          on_tweet(object)
+        end
       end
     end
   end
