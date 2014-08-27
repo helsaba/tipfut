@@ -152,7 +152,7 @@ module TipCryptCurrency
       coind_rpcport = ENV['COIND_RPCPORT']
       coind_username = ENV['COIND_USERNAME']
       coind_password = ENV['COIND_PASSWORD']
-      coind_url = "http://#{coind_username}:#{coind_password}@#{coind_address}:#{coind_port}"
+      coind_url = "http://#{coind_username}:#{coind_password}@#{coind_address}:#{coind_rpcport}"
       @coind = BitcoinRPC.new(coind_url)
     end
 
