@@ -49,7 +49,6 @@ require 'net/https'
 require 'twitter'
 require 'oauth'
 require 'json'
-require 'pp'
 require 'sqlite3'
 require 'active_record'
 require 'bigdecimal'
@@ -215,7 +214,6 @@ module TipCryptCurrency
         end
 
         r_need_time = @client.user(username).created_at + (24 * 60 * 60 * 14)
-        pp r_need_time
         if r_need_time > Time.now
           $log.info("-> Not enough account created time!");
           if isjp(username)
@@ -276,7 +274,6 @@ module TipCryptCurrency
         end
       when /(Follow|follow|フォロー|ふぉろー)して/
         $log.info("Following #{username}...")
-        pp @client.follow(username)
         $log.info("-> Followed.")
         post_tweet("@#{username} をフォローしました！", to_status_id)
       when /balance/
