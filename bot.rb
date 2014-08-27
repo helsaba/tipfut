@@ -132,7 +132,8 @@ module TipCryptCurrency
                          :screen_name => screen_name,
                          :donated => 0,
                          :affection => 50,
-                         :give_at => 0
+                         :give_at => 0,
+                         :banned => 0
                          )
       return user
     end
@@ -195,11 +196,10 @@ module TipCryptCurrency
           return
         end
         $log.info("-> Giving...")
-        BAN_USER.each do |v|
-          if username == v
-            $log.info("-> Banned user.")
-            post_tweet("@#{username} あなたのアカウントはfaucet機能を停止されています。ご不明な点があれば@#{$maintainer_screenname}へご連絡ください。", to_status_id)
-          end
+        if userdata.banned
+          $log.info("-> Banned user.")
+          post_tweet("@#{username} faucet機能が停止されています。ご不明な点があれば@#{$maintainer_screenname}へご連絡ください。", to_status_id)
+          return
         end
         # Tweet count
         if @client.user(username).statuses_count < 25
