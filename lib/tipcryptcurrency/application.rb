@@ -200,7 +200,7 @@ module TipCryptCurrency
 
         if $last_faucet[username] == nil || $last_faucet[username] + (24 * 60 * 60) < Time.now
           fb = @coind.getbalance(@faucet_userid)
-          if fb < 0
+          if fb >= amount
             @coind.move(@faucet_userid, account, amount)
             @log.info("-> Done.")
             if isjp(username)
