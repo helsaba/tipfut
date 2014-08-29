@@ -1,17 +1,17 @@
 ### Config ###
 global:
-  account_prefix: thorowrin-
+  account_prefix: tiplike-
   abe_url: http://api.monaco-ex.org/abe/
 coin:
-  name: Ringo
-  unit: RIN
-  address_prefix: R
+  name: Likecoin
+  unit: LIKE
+  address_prefix: L
 twitter:
   tipbot:
-    screen_name: throwrin
-    userid: 2761016184
+    screen_name: tiplike
+    userid: 2762501305
   faucet:
-    userid: 2761034186
+    userid: 2762538295
   maintainer:
     userid: 2611149793
     screenname: MonacoEx
