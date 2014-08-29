@@ -1,0 +1,19 @@
+### Config ###
+global:
+  account_prefix: thorowrin-
+  abe_url: http://api.monaco-ex.org/abe/
+coin:
+  name: Ringo
+  unit: RIN
+  address_prefix: R
+twitter:
+  tipbot:
+    screen_name: throwrin
+    userid: 2761016184
+  faucet:
+    userid: 2761034186
+  maintainer:
+    userid: 2611149793
+    screenname: MonacoEx
+  developer:
+    userid: 2611149793
