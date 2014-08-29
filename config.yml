@@ -1,17 +1,17 @@
 ### Config ###
 global:
-  account_prefix: thorowrin-
+  account_prefix: tipyaythorowrin-
   abe_url: http://api.monaco-ex.org/abe/
 coin:
-  name: Ringo
-  unit: RIN
-  address_prefix: R
+  name: Yaycoin
+  unit: YAY
+  address_prefix: Y
 twitter:
   tipbot:
-    screen_name: throwrin
-    userid: 2761016184
+    screen_name: tipyay
+    userid: 2762505847
   faucet:
-    userid: 2761034186
+    userid: 2762468190
   maintainer:
     userid: 2611149793
     screenname: MonacoEx
