@@ -217,15 +217,16 @@ module TipCryptCurrency
             userdata.save
           else
             @log.info("-> Not enough faucet pot!")
+            faucet_screen_name = @twitter.user(@config['twitter']['faucet']['userid']).screen_name
             if isjp(username)
               status = dice([
-                             "ごめんなさい、配布用ポットの中身が足りません＞＜ @rin_faucetに送金してもらえると嬉しいですっ！",
-                             "ごめんなさい、配布用ポットに#{@config['coin']['unit']}が入ってないみたいです＞＜ @rin_faucetに送金してもらえると嬉しいですっ！",
-                             "ごめんなさい、配布用ポットの中身がもうありません＞＜ @rin_faucetに送金してもらえると嬉しいですっ！",
-                             "ごめんなさい、配布用ポットの中身がないみたいですっ＞＜ @rin_faucetに送金してもらえると嬉しいですっ！"
+                             "ごめんなさい、配布用ポットの中身が足りません＞＜ @#{faucet_screen_name}に送金してもらえると嬉しいですっ！",
+                             "ごめんなさい、配布用ポットに#{@config['coin']['unit']}が入ってないみたいです＞＜ @#{faucet_screen_name}に送金してもらえると嬉しいですっ！",
+                             "ごめんなさい、配布用ポットの中身がもうありません＞＜ @#{faucet_screen_name}に送金してもらえると嬉しいですっ！",
+                             "ごめんなさい、配布用ポットの中身がないみたいですっ＞＜ @#{faucet_screen_name}に送金してもらえると嬉しいですっ！"
                             ])
             else
-              post_tweet("@#{username} Sorry, there is no more #{@config['coin']['unit']} in faucet (><) Please tip to @rin_faucet#{getps()}", to_status_id)
+              post_tweet("@#{username} Sorry, there is no more #{@config['coin']['unit']} in faucet (><) Please tip to @#{faucet_screen_name}#{getps()}", to_status_id)
             end
           end
         else
