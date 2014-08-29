@@ -198,7 +198,7 @@ module TipCryptCurrency
         amount = (10 + rand(50).to_f) / 10
         @log.debug("Amount: #{amount}")
 
-        if $last_faucet[username] == nil || $last_faucet[username] + (24 * 60 * 60) < Time.now
+        if userdata.give_at + (24 * 60 * 60) < Time.now.to_i
           fb = @coind.getbalance(@faucet_userid)
           if fb >= amount
             @coind.move(@faucet_userid, account, amount)
@@ -213,7 +213,8 @@ module TipCryptCurrency
             else
               post_tweet("Present for you! Sent #{amount}#{@config['coin']['unit']}!", to_status_id)
             end
-            $last_faucet[username] = Time.now
+            userdata.give_at = Time.now.to_i
+            userdata.save
           else
             @log.info("-> Not enough faucet pot!")
             faucet_screen_name = @twitter.user(@config['twitter']['faucet']['userid']).screen_name
