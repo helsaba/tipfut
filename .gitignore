@@ -1,10 +1,9 @@
 # Linux
 .*
 !.gitignore
+!.env.default
 *~
 
 # Other
 *.log
 *.db
-config.rb
-beta-config.rb
