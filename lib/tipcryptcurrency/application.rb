@@ -198,9 +198,9 @@ module TipCryptCurrency
         amount = (10 + rand(50).to_f) / 10
         @log.debug("Amount: #{amount}")
 
-        if $last_faucet[username] == nil || $last_faucet[username] + (24 * 60 * 60) < Time.now
+        if userdata.give_at + (24 * 60 * 60) < Time.now.to_i
           fb = @coind.getbalance(@faucet_userid)
-          if fb < 0
+          if fb >= amount
             @coind.move(@faucet_userid, account, amount)
             @log.info("-> Done.")
             if isjp(username)
@@ -213,18 +213,20 @@ module TipCryptCurrency
             else
               post_tweet("Present for you! Sent #{amount}#{@config['coin']['unit']}!", to_status_id)
             end
-            $last_faucet[username] = Time.now
+            userdata.give_at = Time.now.to_i
+            userdata.save
           else
             @log.info("-> Not enough faucet pot!")
+            faucet_screen_name = @twitter.user(@config['twitter']['faucet']['userid']).screen_name
             if isjp(username)
               status = dice([
-                             "ごめんなさい、配布用ポットの中身が足りません＞＜ @rin_faucetに送金してもらえると嬉しいですっ！",
-                             "ごめんなさい、配布用ポットに#{@config['coin']['unit']}が入ってないみたいです＞＜ @rin_faucetに送金してもらえると嬉しいですっ！",
-                             "ごめんなさい、配布用ポットの中身がもうありません＞＜ @rin_faucetに送金してもらえると嬉しいですっ！",
-                             "ごめんなさい、配布用ポットの中身がないみたいですっ＞＜ @rin_faucetに送金してもらえると嬉しいですっ！"
+                             "ごめんなさい、配布用ポットの中身が足りません＞＜ @#{faucet_screen_name}に送金してもらえると嬉しいですっ！",
+                             "ごめんなさい、配布用ポットに#{@config['coin']['unit']}が入ってないみたいです＞＜ @#{faucet_screen_name}に送金してもらえると嬉しいですっ！",
+                             "ごめんなさい、配布用ポットの中身がもうありません＞＜ @#{faucet_screen_name}に送金してもらえると嬉しいですっ！",
+                             "ごめんなさい、配布用ポットの中身がないみたいですっ＞＜ @#{faucet_screen_name}に送金してもらえると嬉しいですっ！"
                             ])
             else
-              post_tweet("@#{username} Sorry, there is no more #{@config['coin']['unit']} in faucet (><) Please tip to @rin_faucet#{getps()}", to_status_id)
+              post_tweet("@#{username} Sorry, there is no more #{@config['coin']['unit']} in faucet (><) Please tip to @#{faucet_screen_name}#{getps()}", to_status_id)
             end
           end
         else
