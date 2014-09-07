@@ -1,0 +1,31 @@
+<h1>送金</h1>
+
+<h2>送金先アドレス</h2>
+
+<%= @coinaddr %>
+
+<h2>金額指定</h2>
+
+<%= form_tag("/withdraw", :method => :post) do %>
+  <%= hidden_field_tag :withdraw_magic, @magic %>
+  <%= text_field_tag :amount, @amount  %>
+  <%= submit_tag "送金依頼" %>
+<% end %>
+
+<h2>残高情報</h2>
+
+<table>
+  <tr>
+    <th>あなたの保有残高</th>
+    <td><%= @balance %></td>
+  </tr>
+  <tr>
+    <th>送金手数料</th>
+    <td><%= @tax %></td>
+  </tr>
+  <tr>
+    <th>送金可能額</th>
+    <td><%= @balance - @tax %></td>
+  </tr>
+</table>
+

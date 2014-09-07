@@ -1,1 +1,2 @@
-worker: ruby tipbot.rb
+#worker: ruby tipbot.rb
+web: rails s
