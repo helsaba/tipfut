@@ -1,6 +1,6 @@
 ### Config ###
 global:
-  account_prefix: thorowrin-
+  account_prefix: throwrin
   abe_url: http://api.monaco-ex.org/abe/
 coin:
   name: Ringo

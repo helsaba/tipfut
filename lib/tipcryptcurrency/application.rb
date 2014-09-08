@@ -102,7 +102,7 @@ module TipCryptCurrency
         config.access_token        = ENV['TWITTER_ACCESS_TOKEN']
         config.access_token_secret = ENV['TWITTER_ACCESS_TOKEN_SECRET']
       end
-      @twitter.update("Zzz.... (=_=)....")
+      @twitter.update("Zzz.#{(0..rand(5)).map { '.' }.join} (=_=) #{(0..rand(20)).map { '.' }.join}")
 
       @config = YAML.load_file('config.yml')
       @faucet_userid = "#{@config['global']['account_prefix']}-#{@config['twitter']['faucet']['userid']}"
