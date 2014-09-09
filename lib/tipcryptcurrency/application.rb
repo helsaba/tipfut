@@ -107,11 +107,15 @@ module TipCryptCurrency
       @config = YAML.load_file('config.yml')
       @faucet_userid = "#{@config['global']['account_prefix']}-#{@config['twitter']['faucet']['userid']}"
 
-      coind_address = ENV['COIND_ADDRESS'] || '127.0.0.1'
-      coind_rpcport = ENV['COIND_RPCPORT']
-      coind_username = ENV['COIND_USERNAME']
-      coind_password = ENV['COIND_PASSWORD']
-      coind_url = "http://#{coind_username}:#{coind_password}@#{coind_address}:#{coind_rpcport}"
+      if ENV['COIND_URL']
+        coind_url = ENV['COIND_URL']
+      else
+        coind_address = ENV['COIND_ADDRESS'] || '127.0.0.1'
+        coind_rpcport = ENV['COIND_RPCPORT']
+        coind_username = ENV['COIND_USERNAME']
+        coind_password = ENV['COIND_PASSWORD']
+        coind_url = "http://#{coind_username}:#{coind_password}@#{coind_address}:#{coind_rpcport}"
+      end
       @coind = BitcoinRPC.new(coind_url)
 
       @twitter.update("ふわわ・・・" + dice(["うたたね", "仮眠", "気絶"]) + "していました　お仕事、始めまーす。")
