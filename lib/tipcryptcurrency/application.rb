@@ -301,10 +301,10 @@ module TipCryptCurrency
           @log.info("-> Not enough #{@config['coin']['unit']}. (#{balance} < #{total})")
           if isjp(username)
             status = dice([
-                           "ごめんなさい、残高が足りないようです#{getps()} 引き出しには#{tax}#{@config['coin']['unit']}の手数料がかかることにも注意してください！ (現在#{balance}#{@config['coin']['unit']})",
-                           "ごめんなさい、残高が足りません＞＜ 引き出しには#{tax}#{@config['coin']['unit']}の手数料がかかることにも注意してください！ (現在#{balance}#{@config['coin']['unit']})",
-                           "ごめんなさい、残高が足りないみたいです#{getps()} 引き出しには#{tax}#{@config['coin']['unit']}の手数料がかかることにも注意してください！ (現在#{balance}#{@config['coin']['unit']})"
-                          ])
+                           "ごめんなさい、残高が足りないようです#{getps()}",
+                           "ごめんなさい、残高が足りません＞＜",
+                           "ごめんなさい、残高が足りないみたいです#{getps()}"])
+            status += " 引き出しには#{tax}#{@config['coin']['unit']}の手数料がかかることにも注意してください！(現在#{balance}#{@config['coin']['unit']})"
           else
             status = "Not enough balance. Please note that required #{tax}#{@config['coin']['unit']} fee when withdraw#{getps()}(Balance:#{balance}#{@config['coin']['unit']})"
           end
