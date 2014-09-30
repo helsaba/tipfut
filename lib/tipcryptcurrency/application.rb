@@ -215,7 +215,7 @@ module TipCryptCurrency
                              "#{amount}#{@config['coin']['unit']}プレゼントしました！！"
                             ])
             else
-              post_tweet("Present for you! Sent #{amount}#{@config['coin']['unit']}!", to_status_id)
+              status = "Present for you! Sent #{amount}#{@config['coin']['unit']}!"
             end
             userdata.give_at = Time.now.to_i
             userdata.save
@@ -230,7 +230,7 @@ module TipCryptCurrency
                              "ごめんなさい、配布用ポットの中身がないみたいですっ＞＜ @#{faucet_screen_name}に送金してもらえると嬉しいですっ！"
                             ])
             else
-              post_tweet("@#{username} Sorry, there is no more #{@config['coin']['unit']} in faucet (><) Please tip to @#{faucet_screen_name}#{getps()}", to_status_id)
+              status = "@#{username} Sorry, there is no more #{@config['coin']['unit']} in faucet (><) Please tip to @#{faucet_screen_name}#{getps()}"
             end
           end
         else
@@ -305,10 +305,10 @@ module TipCryptCurrency
           @log.info("-> Not enough #{@config['coin']['unit']}. (#{balance} < #{total})")
           if isjp(username)
             status = dice([
-                           "ごめんなさい、残高が足りないようです#{getps()} 引き出しには#{tax}#{@config['coin']['unit']}の手数料がかかることにも注意してください！ (現在#{balance}#{@config['coin']['unit']})",
-                           "ごめんなさい、残高が足りません＞＜ 引き出しには#{tax}#{@config['coin']['unit']}の手数料がかかることにも注意してください！ (現在#{balance}#{@config['coin']['unit']})",
-                           "ごめんなさい、残高が足りないみたいです#{getps()} 引き出しには#{tax}#{@config['coin']['unit']}の手数料がかかることにも注意してください！ (現在#{balance}#{@config['coin']['unit']})"
-                          ])
+                           "ごめんなさい、残高が足りないようです#{getps()}",
+                           "ごめんなさい、残高が足りません＞＜",
+                           "ごめんなさい、残高が足りないみたいです#{getps()}"])
+            status += " 引き出しには#{tax}#{@config['coin']['unit']}の手数料がかかることにも注意してください！(現在#{balance}#{@config['coin']['unit']})"
           else
             status = "Not enough balance. Please note that required #{tax}#{@config['coin']['unit']} fee when withdraw#{getps()}(Balance:#{balance}#{@config['coin']['unit']})"
           end
@@ -402,7 +402,6 @@ module TipCryptCurrency
         to_account = "#{@config['global']['account_prefix']}-#{to_userdata.id.to_s}"
         @coind.move(account,to_account,amount)
         @log.info("-> Sent to #{to_userdata.id.to_s}.")
-@log.debug("#{@config['twitter']['faucet']['userid'].to_s == to_userdata.id.to_s}")
         if to_userdata.id.to_s == @config['twitter']['developer']['userid'].to_s
           userdata.affection = userdata.affection + (amount * 1).round
           post_tweet(dice([
@@ -496,6 +495,10 @@ module TipCryptCurrency
         case object
         when Twitter::Tweet
           on_tweet(object)
+        when Twitter::DirectMessage
+          @log.info("It's a direct message!")
+        when Twitter::Streaming::StallWarning
+          @log.warn("Falling behind!")
         end
       end
     end
