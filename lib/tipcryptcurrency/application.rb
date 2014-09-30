@@ -398,7 +398,6 @@ module TipCryptCurrency
         to_account = "#{@config['global']['account_prefix']}-#{to_userdata.id.to_s}"
         @coind.move(account,to_account,amount)
         @log.info("-> Sent to #{to_userdata.id.to_s}.")
-@log.debug("#{@config['twitter']['faucet']['userid'].to_s == to_userdata.id.to_s}")
         if to_userdata.id.to_s == @config['twitter']['developer']['userid'].to_s
           userdata.affection = userdata.affection + (amount * 1).round
           post_tweet(dice([
