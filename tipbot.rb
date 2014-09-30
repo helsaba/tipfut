@@ -12,8 +12,9 @@ TipCryptCurrency::Database.connect
 TipCryptCurrency::Database.upgrade!
 
 app = TipCryptCurrency::Application.new
-#begin
+begin
   app.run
-#rescue Exception => e
-#  retry
-#end
+rescue Exception => e
+  sleep(5)
+  retry
+end
