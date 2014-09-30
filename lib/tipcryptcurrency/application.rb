@@ -491,6 +491,10 @@ module TipCryptCurrency
         case object
         when Twitter::Tweet
           on_tweet(object)
+        when Twitter::DirectMessage
+          @log.info("It's a direct message!")
+        when Twitter::Streaming::StallWarning
+          @log.warn("Falling behind!")
         end
       end
     end
