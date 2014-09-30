@@ -211,7 +211,7 @@ module TipCryptCurrency
                              "#{amount}#{@config['coin']['unit']}プレゼントしました！！"
                             ])
             else
-              post_tweet("Present for you! Sent #{amount}#{@config['coin']['unit']}!", to_status_id)
+              status = "Present for you! Sent #{amount}#{@config['coin']['unit']}!"
             end
             userdata.give_at = Time.now.to_i
             userdata.save
@@ -226,7 +226,7 @@ module TipCryptCurrency
                              "ごめんなさい、配布用ポットの中身がないみたいですっ＞＜ @#{faucet_screen_name}に送金してもらえると嬉しいですっ！"
                             ])
             else
-              post_tweet("@#{username} Sorry, there is no more #{@config['coin']['unit']} in faucet (><) Please tip to @#{faucet_screen_name}#{getps()}", to_status_id)
+              status = "@#{username} Sorry, there is no more #{@config['coin']['unit']} in faucet (><) Please tip to @#{faucet_screen_name}#{getps()}"
             end
           end
         else
