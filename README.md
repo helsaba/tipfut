@@ -1,8 +1,12 @@
-Throwrin
+Tipfut
 ======================
-Twitter bot for ringo.
+Twitter bot for futcoin.
 
 Authors
+-------
+* [P4coin](http://p4coin.pw/)
+
+Original (throwrin) Authors
 -------
 * [MonacoEx.org](http://www.monaco-ex.org/)
 
