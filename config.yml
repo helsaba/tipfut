@@ -1,19 +1,20 @@
 ### Config ###
 global:
-  account_prefix: throwrin
-  abe_url: http://api.monaco-ex.org/abe/
+  account_prefix: tipfut
+  abe_url: http://p4coin.pw/futb/
 coin:
-  name: Ringo
-  unit: RIN
-  address_prefix: R
+  name: Futcoin
+  unit: FUTC
+  address_prefix: F
 twitter:
   tipbot:
-    screen_name: throwrin
-    userid: 2761016184
+    screen_name: tipfut
+    userid: 3031806236
   faucet:
-    userid: 2761034186
+    userid: 3031767930
   maintainer:
-    userid: 2611149793
-    screenname: MonacoEx
+    userid: 2905707739
+    screenname: P4coin
   developer:
-    userid: 2611149793
+    userid: 107966371
+    
